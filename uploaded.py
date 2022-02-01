@@ -9,7 +9,7 @@ import time
 import sys
 import cv2
 import numpy
-from RBGripPipeline import RedBallGripPipeline
+from rb_grip_contours import RedBallGripContours
 from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
 
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 
     
 
-    RedGrip = RedBallGripPipeline()
+    RedGrip = RedBallGripContours()
 
     sinkA = CvSink("main cam")  
 
@@ -258,7 +258,10 @@ if __name__ == "__main__":
     while True:
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         RedGrip.process(image_A) #passing image_A and searching for the red ball
-        image_A = cv2.drawKeypoints(image_A, RedGrip.find_blobs_output, outputImage = None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS) #drawing out the keypoints onto the image
+        #image_A = cv2.drawKeypoints(image_A, RedGrip.find_blobs_output, outputImage = None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS) #drawing out the keypoints onto the image
+        contours = RedGrip.filter_contours_output
+        for contour in contours:
+            cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
         dashSource1.putFrame(image_A) #putting the postProcessed\ frame onto smartdashboard
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
