@@ -207,6 +207,53 @@ def startSwitchedCamera(config):
 
     return server
 
+def getExtrema(contours):
+    contourList = contours
+    contourPoints = contourList[0][:,0]
+    sorted_contours = sorted(contourPoints, key=lambda tup: tup[0])
+
+    min_point = sorted_contours[0]
+    max_point = sorted_contours[len(sorted_contours)-1]
+
+
+    return max_point, min_point
+
+def runBall(image, mainContours):
+    for contours in mainContours:
+
+        contourPoints = contours[:,0]
+
+        x_points_yellow = contourPoints[:,0]
+        y_points_yellow = contourPoints[:,1]
+
+        x_min_yellow = numpy.amin(x_points_yellow)
+        x_max_yellow = numpy.amax(x_points_yellow)
+
+        #for distance
+        Yellow_Width = x_max_yellow - x_min_yellow
+        #print(Yellow_Width)
+
+        #call distance function to return widths
+        Yellow_Real_Width = 7 #in
+
+
+        y_min_yellow = numpy.amin(y_points_yellow)
+        y_max_yellow = numpy.amax(y_points_yellow)
+
+        x_center_yellow = ((x_max_yellow - x_min_yellow)/2) + x_min_yellow
+        y_center_yellow = ((y_max_yellow - y_min_yellow)/2) + y_min_yellow
+
+        #Draws center of balls
+        #image = cv2.line(image, ((x_center_yellow).astype(numpy.int64),((y_center_yellow) - 15).astype(numpy.int64)),((x_center_yellow).astype(numpy.int64),((y_center_yellow) + 15).astype(numpy.int64)),(0,0,0),3)
+        #image = cv2.line(image, (((x_center_yellow) - 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(((x_center_yellow) + 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(0,0,0),3)
+
+        #Draws box around balls
+        image = cv2.line(image, ((x_max_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),((x_max_yellow).astype(numpy.int64),((y_min_yellow)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_min_yellow)).astype(numpy.int64),(y_max_yellow).astype(numpy.int64)),(((x_min_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, ((x_max_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),((x_min_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_max_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(((x_min_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(0,0,0),5)
+    
+    return image
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         configFile = sys.argv[1]
@@ -260,8 +307,27 @@ if __name__ == "__main__":
         RedGrip.process(image_A) #passing image_A and searching for the red ball
         #image_A = cv2.drawKeypoints(image_A, RedGrip.find_blobs_output, outputImage = None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS) #drawing out the keypoints onto the image
         contours = RedGrip.filter_contours_output
+        min_x = 100000
+        min_y = 100000
+        max_x = 0
+        max_y = 0
+        
         for contour in contours:
+            x = contour[0][0][0]
+            y = contour[0][0][1]
+            if x > max_x:
+                max_x = x
+            if x < min_x:
+                min_x = x
+            if y > max_y:
+                max_y = y
+            if y < min_y:
+                min_y = y
+
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
+        print(f"Max X{max_x} Min X{min_x} Max Y{max_y} Min Y{min_y}")
+        if contours != []:
+            image_A = runBall(image_A, contours)
         dashSource1.putFrame(image_A) #putting the postProcessed\ frame onto smartdashboard
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
