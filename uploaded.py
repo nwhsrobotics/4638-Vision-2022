@@ -174,6 +174,7 @@ def startCamera(config):
     inst = CameraServer.getInstance()
     camera = UsbCamera(config.name, config.path)
     server = inst.startAutomaticCapture(camera=camera, return_server=True)
+    print(server)
 
     camera.setConfigJson(json.dumps(config.config))
     camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen)
@@ -223,37 +224,41 @@ def runBall(image, mainContours):
 
         contourPoints = contours[:,0]
 
-        x_points_yellow = contourPoints[:,0]
-        y_points_yellow = contourPoints[:,1]
+        x_points_red = contourPoints[:,0]
+        y_points_red = contourPoints[:,1]
 
-        x_min_yellow = numpy.amin(x_points_yellow)
-        x_max_yellow = numpy.amax(x_points_yellow)
+        x_min_red = numpy.amin(x_points_red)
+        x_max_red = numpy.amax(x_points_red)
+        red_width = x_max_red - x_min_red
+        FOCAL_LENGTH = 217.42
 
         #for distance
-        Yellow_Width = x_max_yellow - x_min_yellow
-        #print(Yellow_Width)
+        Red_Width = x_max_red - x_min_red
+        #print(Red_Width)
 
         #call distance function to return widths
-        Yellow_Real_Width = 7 #in
+        Red_Real_Width = 9.5 #in
+        perceived_distance = (FOCAL_LENGTH*Red_Real_Width)/red_width
 
 
-        y_min_yellow = numpy.amin(y_points_yellow)
-        y_max_yellow = numpy.amax(y_points_yellow)
+        y_min_red = numpy.amin(y_points_red)
+        y_max_red = numpy.amax(y_points_red)
 
-        x_center_yellow = ((x_max_yellow - x_min_yellow)/2) + x_min_yellow
-        y_center_yellow = ((y_max_yellow - y_min_yellow)/2) + y_min_yellow
+        x_center_yellow = ((x_max_red - x_min_red)/2) + x_min_red
+        y_center_yellow = ((y_max_red - y_min_red)/2) + y_min_red
+        #print(f"Distance: {perceivedDistance}")
 
         #Draws center of balls
         #image = cv2.line(image, ((x_center_yellow).astype(numpy.int64),((y_center_yellow) - 15).astype(numpy.int64)),((x_center_yellow).astype(numpy.int64),((y_center_yellow) + 15).astype(numpy.int64)),(0,0,0),3)
         #image = cv2.line(image, (((x_center_yellow) - 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(((x_center_yellow) + 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(0,0,0),3)
 
         #Draws box around balls
-        image = cv2.line(image, ((x_max_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),((x_max_yellow).astype(numpy.int64),((y_min_yellow)).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, (((x_min_yellow)).astype(numpy.int64),(y_max_yellow).astype(numpy.int64)),(((x_min_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, ((x_max_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),((x_min_yellow).astype(numpy.int64),((y_max_yellow)).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, (((x_max_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(((x_min_yellow)).astype(numpy.int64),(y_min_yellow).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, ((x_max_red).astype(numpy.int64),((y_max_red)).astype(numpy.int64)),((x_max_red).astype(numpy.int64),((y_min_red)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_min_red)).astype(numpy.int64),(y_max_red).astype(numpy.int64)),(((x_min_red)).astype(numpy.int64),(y_min_red).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, ((x_max_red).astype(numpy.int64),((y_max_red)).astype(numpy.int64)),((x_min_red).astype(numpy.int64),((y_max_red)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_max_red)).astype(numpy.int64),(y_min_red).astype(numpy.int64)),(((x_min_red)).astype(numpy.int64),(y_min_red).astype(numpy.int64)),(0,0,0),5)
     
-    return image
+    return perceived_distance, image
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         configFile = sys.argv[1]
@@ -307,28 +312,13 @@ if __name__ == "__main__":
         RedGrip.process(image_A) #passing image_A and searching for the red ball
         #image_A = cv2.drawKeypoints(image_A, RedGrip.find_blobs_output, outputImage = None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS) #drawing out the keypoints onto the image
         contours = RedGrip.filter_contours_output
-        min_x = 100000
-        min_y = 100000
-        max_x = 0
-        max_y = 0
-        
         for contour in contours:
-            x = contour[0][0][0]
-            y = contour[0][0][1]
-            if x > max_x:
-                max_x = x
-            if x < min_x:
-                min_x = x
-            if y > max_y:
-                max_y = y
-            if y < min_y:
-                min_y = y
-
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
-        print(f"Max X{max_x} Min X{min_x} Max Y{max_y} Min Y{min_y}")
+        red_dist = -1
         if contours != []:
-            image_A = runBall(image_A, contours)
-        dashSource1.putFrame(image_A) #putting the postProcessed\ frame onto smartdashboard
+            red_dist, image_A = runBall(image_A, contours)
+        dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
+        sd.putNumber('Red Ball Distance', red_dist)
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
 
