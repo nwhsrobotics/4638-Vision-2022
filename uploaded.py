@@ -230,11 +230,11 @@ def runBall(image, mainContours):
         x_min_red = numpy.amin(x_points_red)
         x_max_red = numpy.amax(x_points_red)
         red_width = x_max_red - x_min_red
-        FOCAL_LENGTH = 217.42
+        FOCAL_LENGTH = 289.1 #old 217.42   
 
         #for distance
-        Red_Width = x_max_red - x_min_red
-        #print(Red_Width)
+        Red_Width = x_max_red - x_min_red   
+
 
         #call distance function to return widths
         Red_Real_Width = 9.5 #in
