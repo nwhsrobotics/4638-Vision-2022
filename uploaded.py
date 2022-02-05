@@ -294,7 +294,7 @@ if __name__ == "__main__":
 
     sinkA = CvSink("main cam")  
 
-    sinkA.setSource(cameras[0])
+    sinkA.setSource(cameras[1])
 
     image_A = numpy.ndarray((320,240,3), dtype = numpy.uint8)
 
