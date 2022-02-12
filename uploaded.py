@@ -7,11 +7,13 @@
 import json
 import time
 import sys
+from click import get_current_context
 import cv2
 import numpy
 from rb_grip_contours import RedBallGripContours
 from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
+from ReflectiveTapeContours import ReflectiveTapeContours
 
 #   JSON format:
 #   {
@@ -219,6 +221,58 @@ def getExtrema(contours):
 
     return max_point, min_point
 
+def runReflective(image, mainContours):
+    found_contours = []
+    for contours in mainContours:
+
+        contourPoints = contours[:,0]
+
+        x_points_green = contourPoints[:,0]
+        y_points_green = contourPoints[:,1]
+
+        x_min_green = numpy.amin(x_points_green)
+        x_max_green = numpy.amax(x_points_green)
+        green_width = x_max_green - x_min_green
+        FOCAL_LENGTH = 289.1 #old 217.42   
+
+
+        #call distance function to return widths
+        Green_Real_Width = 5 #in
+        perceived_distance = (FOCAL_LENGTH*Green_Real_Width)/green_width
+
+
+        y_min_green = numpy.amin(y_points_green)
+        y_max_green = numpy.amax(y_points_green)
+
+        x_center_green = ((x_max_green - x_min_green)/2) + x_min_green
+        y_center_green = ((y_max_green - y_min_green)/2) + y_min_green
+
+        
+
+
+        #Draws center of balls
+        #image = cv2.line(image, ((x_center_yellow).astype(numpy.int64),((y_center_yellow) - 15).astype(numpy.int64)),((x_center_yellow).astype(numpy.int64),((y_center_yellow) + 15).astype(numpy.int64)),(0,0,0),3)
+        #image = cv2.line(image, (((x_center_yellow) - 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(((x_center_yellow) + 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(0,0,0),3)
+
+        #Draws box around balls
+        image = cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_max_green).astype(numpy.int64),((y_min_green)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_min_green)).astype(numpy.int64),(y_max_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_min_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),(0,0,0),5)
+        image = cv2.line(image, (((x_max_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
+    
+        found_contours.append((perceived_distance, x_center_green, y_center_green, image)) #creating a tuple with all of the found contours
+    
+    closestBallData = tuple()
+    shortestDistance = 10000000000000000
+    for data_tup in found_contours:
+        if data_tup[0] < shortestDistance:
+            shortestDistance = data_tup[0]
+            closestBallData = data_tup 
+
+    return closestBallData
+
+
+
 def runBall(image, mainContours):
     found_contours = []
     for contours in mainContours:
@@ -233,8 +287,6 @@ def runBall(image, mainContours):
         red_width = x_max_red - x_min_red
         FOCAL_LENGTH = 289.1 #old 217.42   
 
-        #for distance
-        Red_Width = x_max_red - x_min_red   
 
 
         #call distance function to return widths
@@ -324,15 +376,27 @@ if __name__ == "__main__":
     while True:
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         RedGrip.process(image_A) #passing image_A and searching for the red ball
-        #image_A = cv2.drawKeypoints(image_A, RedGrip.find_blobs_output, outputImage = None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS) #drawing out the keypoints onto the image
-        contours = RedGrip.filter_contours_output
-        for contour in contours:
+        ReflectiveTapeContours.process(image_A)
+        red_contours = RedGrip.filter_contours_output
+        green_contours = ReflectiveTapeContours.filter_contours_output
+
+        for contour in red_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
+
+        for contour in green_contours:
+            cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
+
         red_dist = -1
-        if contours != []:
-            red_dist, x_center_red, y_center_red, image_A = runBall(image_A, contours)
+        green_dist = -1
+        if red_contours != []:
+            red_dist, x_center_red, y_center_red, image_A = runBall(image_A, red_contours)
             sd.putNumber('Red Ball X', x_center_red)
             sd.putNumber('Red Ball Y', y_center_red)
+        
+        if green_contours != []:
+            pass
+            #TODO: complete this phrase
+        
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         sd.putNumber('Red Ball Distance', red_dist)
         #TODO: Make sure to publish the contours report onto SmartDashboard
