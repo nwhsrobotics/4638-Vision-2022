@@ -7,7 +7,6 @@
 import json
 import time
 import sys
-from click import get_current_context
 import cv2
 import numpy
 from rb_grip_contours import RedBallGripContours
@@ -357,6 +356,7 @@ if __name__ == "__main__":
     
 
     RedGrip = RedBallGripContours()
+    GreenGrip = ReflectiveTapeContours()
 
     sinkA = CvSink("main cam")  
 
@@ -376,9 +376,9 @@ if __name__ == "__main__":
     while True:
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         RedGrip.process(image_A) #passing image_A and searching for the red ball
-        ReflectiveTapeContours.process(image_A)
+        GreenGrip.process(image_A)
         red_contours = RedGrip.filter_contours_output
-        green_contours = ReflectiveTapeContours.filter_contours_output
+        green_contours = GreenGrip.filter_contours_output
 
         for contour in red_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
@@ -394,11 +394,14 @@ if __name__ == "__main__":
             sd.putNumber('Red Ball Y', y_center_red)
         
         if green_contours != []:
-            pass
+            green_dist, x_center_green, y_center_green, image_A = runReflective(image_A, green_contours)
+            sd.putNumber('Green X', x_center_green)
+            sd.putNumber('Green Y', y_center_green)
             #TODO: complete this phrase
         
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         sd.putNumber('Red Ball Distance', red_dist)
+        sd.putNumber('Green Distance', green_dist)
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
 
