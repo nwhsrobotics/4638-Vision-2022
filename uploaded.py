@@ -220,6 +220,7 @@ def getExtrema(contours):
     return max_point, min_point
 
 def runBall(image, mainContours):
+    found_contours = []
     for contours in mainContours:
 
         contourPoints = contours[:,0]
@@ -244,9 +245,11 @@ def runBall(image, mainContours):
         y_min_red = numpy.amin(y_points_red)
         y_max_red = numpy.amax(y_points_red)
 
-        x_center_yellow = ((x_max_red - x_min_red)/2) + x_min_red
-        y_center_yellow = ((y_max_red - y_min_red)/2) + y_min_red
-        #print(f"Distance: {perceivedDistance}")
+        x_center_red = ((x_max_red - x_min_red)/2) + x_min_red
+        y_center_red = ((y_max_red - y_min_red)/2) + y_min_red
+
+        
+
 
         #Draws center of balls
         #image = cv2.line(image, ((x_center_yellow).astype(numpy.int64),((y_center_yellow) - 15).astype(numpy.int64)),((x_center_yellow).astype(numpy.int64),((y_center_yellow) + 15).astype(numpy.int64)),(0,0,0),3)
@@ -258,7 +261,18 @@ def runBall(image, mainContours):
         image = cv2.line(image, ((x_max_red).astype(numpy.int64),((y_max_red)).astype(numpy.int64)),((x_min_red).astype(numpy.int64),((y_max_red)).astype(numpy.int64)),(0,0,0),5)
         image = cv2.line(image, (((x_max_red)).astype(numpy.int64),(y_min_red).astype(numpy.int64)),(((x_min_red)).astype(numpy.int64),(y_min_red).astype(numpy.int64)),(0,0,0),5)
     
-    return perceived_distance, image
+        found_contours.append((perceived_distance, x_center_red, y_center_red, image)) #creating a tuple with all of the found contours
+    
+    closestBallData = tuple()
+    shortestDistance = 10000000000000000
+    for data_tup in found_contours:
+        if data_tup[0] < shortestDistance:
+            shortestDistance = data_tup[0]
+            closestBallData = data_tup 
+
+    return closestBallData
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         configFile = sys.argv[1]
@@ -316,7 +330,9 @@ if __name__ == "__main__":
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
         red_dist = -1
         if contours != []:
-            red_dist, image_A = runBall(image_A, contours)
+            red_dist, x_center_red, y_center_red, image_A = runBall(image_A, contours)
+            sd.putNumber('Red Ball X', x_center_red)
+            sd.putNumber('Red Ball Y', y_center_red)
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         sd.putNumber('Red Ball Distance', red_dist)
         #TODO: Make sure to publish the contours report onto SmartDashboard
