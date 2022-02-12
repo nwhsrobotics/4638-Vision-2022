@@ -12,7 +12,7 @@ class RedBallGripContours:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [0.0, 180.0]
+        self.__hsv_threshold_hue = [134, 180.0]
         self.__hsv_threshold_saturation = [138.67660533056787, 254.68313908661398]
         self.__hsv_threshold_value = [31.888387595008737, 255.0]
 
