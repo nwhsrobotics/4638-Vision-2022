@@ -14,6 +14,9 @@ from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
 from ReflectiveTapeContours import ReflectiveTapeContours
 
+VIDEO_WIDTH = 320
+VIDEO_HEIGHT = 240
+
 #   JSON format:
 #   {
 #       "team": <team number>,
@@ -222,6 +225,10 @@ def getExtrema(contours):
 
 def runReflective(image, mainContours):
     found_contours = []
+    num_found_countours = len(mainContours)
+    avg_dist = 0
+    avg_x_center_green = 0
+    avg_y_center_green = 0
     for contours in mainContours:
 
         contourPoints = contours[:,0]
@@ -254,21 +261,24 @@ def runReflective(image, mainContours):
         #image = cv2.line(image, (((x_center_yellow) - 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(((x_center_yellow) + 15).astype(numpy.int64),(y_center_yellow).astype(numpy.int64)),(0,0,0),3)
 
         #Draws box around balls
-        image = cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_max_green).astype(numpy.int64),((y_min_green)).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, (((x_min_green)).astype(numpy.int64),(y_max_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_min_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),(0,0,0),5)
-        image = cv2.line(image, (((x_max_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
-    
+        cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_max_green).astype(numpy.int64),((y_min_green)).astype(numpy.int64)),(0,0,0),5)
+        cv2.line(image, (((x_min_green)).astype(numpy.int64),(y_max_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
+        cv2.line(image, ((x_max_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),((x_min_green).astype(numpy.int64),((y_max_green)).astype(numpy.int64)),(0,0,0),5)
+        cv2.line(image, (((x_max_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(((x_min_green)).astype(numpy.int64),(y_min_green).astype(numpy.int64)),(0,0,0),5)
+        avg_dist += perceived_distance
+        avg_x_center_green += x_center_green
+        avg_y_center_green += y_center_green
+
         found_contours.append((perceived_distance, x_center_green, y_center_green, image)) #creating a tuple with all of the found contours
     
-    closestBallData = tuple()
-    shortestDistance = 10000000000000000
-    for data_tup in found_contours:
-        if data_tup[0] < shortestDistance:
-            shortestDistance = data_tup[0]
-            closestBallData = data_tup 
+    
 
-    return closestBallData
+    avg_dist = avg_dist/num_found_countours
+    avg_x_center_green = avg_x_center_green/num_found_countours
+    avg_y_center_green = avg_y_center_green/num_found_countours
+    cv2.circle(image, (int(avg_x_center_green), int(avg_y_center_green)), radius=7, color=(0, 0, 255), thickness=7)    
+    
+    return (avg_dist, avg_x_center_green, avg_y_center_green, image)
 
 
 
@@ -362,13 +372,15 @@ if __name__ == "__main__":
 
     sinkA.setSource(cameras[1])
 
-    image_A = numpy.ndarray((320,240,3), dtype = numpy.uint8)
+    image_A = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
 
     
     camservInst = CameraServer.getInstance()
-    dashSource1 = camservInst.putVideo("UI Active Cam", 320, 240) #creating a single main camera object
+    dashSource1 = camservInst.putVideo("UI Active Cam", VIDEO_WIDTH, VIDEO_HEIGHT) #creating a single main camera object
 
     sd = ntinst.getTable('SmartDashboard') #getting the smart dashboard object
+    isRedAlliance = sd.getBoolean("isRedAlliance", False)
+    
     
     print("initalize complete")
 
@@ -379,7 +391,8 @@ if __name__ == "__main__":
         GreenGrip.process(image_A)
         red_contours = RedGrip.filter_contours_output
         green_contours = GreenGrip.filter_contours_output
-
+        motor_velocity = sd.getNumber("Motor Velocity", 0)
+        
         for contour in red_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
 
@@ -397,8 +410,10 @@ if __name__ == "__main__":
             green_dist, x_center_green, y_center_green, image_A = runReflective(image_A, green_contours)
             sd.putNumber('Green X', x_center_green)
             sd.putNumber('Green Y', y_center_green)
-            #TODO: complete this phrase
-        
+
+        y_val = motor_velocity/10
+        y_val = VIDEO_HEIGHT - y_val
+        cv2.line(image_A, (0, y_val), (VIDEO_WIDTH, y_val), (192, 192, 192), 3)
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         sd.putNumber('Red Ball Distance', red_dist)
         sd.putNumber('Green Distance', green_dist)
