@@ -386,6 +386,7 @@ if __name__ == "__main__":
 
     
     while True:
+        divisor = sd.getNumber("Speed Constant", (5000/VIDEO_HEIGHT))
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         RedGrip.process(image_A) #passing image_A and searching for the red ball
         GreenGrip.process(image_A)
@@ -399,23 +400,30 @@ if __name__ == "__main__":
         for contour in green_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
 
-        red_dist = -1
+        ball_dist = -1
         green_dist = -1
         if red_contours != []:
-            red_dist, x_center_red, y_center_red, image_A = runBall(image_A, red_contours)
-            sd.putNumber('Red Ball X', x_center_red)
-            sd.putNumber('Red Ball Y', y_center_red)
+            ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, red_contours)
+            x_center_ball = x_center_ball/VIDEO_WIDTH
+            y_center_ball = y_center_ball/VIDEO_HEIGHT
+            sd.putNumber('Ball X', x_center_ball)
+            sd.putNumber('Ball Y', y_center_ball)
         
         if green_contours != []:
             green_dist, x_center_green, y_center_green, image_A = runReflective(image_A, green_contours)
+
+            #x center and y center is in terms of pixels, converting pixels to a value between 0 and 1
+            x_center_green = x_center_green/VIDEO_WIDTH
+            y_center_green = y_center_green/VIDEO_HEIGHT
             sd.putNumber('Green X', x_center_green)
             sd.putNumber('Green Y', y_center_green)
 
-        y_val = motor_velocity/10
-        y_val = VIDEO_HEIGHT - y_val
-        cv2.line(image_A, (0, y_val), (VIDEO_WIDTH, y_val), (192, 192, 192), 3)
+        y_val = motor_velocity/divisor
+        y_val = int(VIDEO_HEIGHT - y_val)
+
+        cv2.line(image_A, (0, y_val), (VIDEO_WIDTH, y_val), (192, 192, 192), 2)
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
-        sd.putNumber('Red Ball Distance', red_dist)
+        sd.putNumber('Ball Distance', ball_dist)
         sd.putNumber('Green Distance', green_dist)
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
