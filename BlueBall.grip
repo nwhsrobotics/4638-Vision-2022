@@ -160,7 +160,7 @@
     <language>Python</language>
     <className>BlueBallGripPipeline</className>
     <implementWpilibPipeline>false</implementWpilibPipeline>
-    <saveDir>/Users/kavip/GRIP</saveDir>
+    <saveDir>/Users/kavip/Documents/GitHub/4638-Vision-2022</saveDir>
     <packageName></packageName>
     <moduleName>bb_grip_contours</moduleName>
   </codeGenerationSettings>

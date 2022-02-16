@@ -9,10 +9,13 @@ import time
 import sys
 import cv2
 import numpy
+from pip import main
+from bb_grip_contours import BlueBallGripPipeline
 from rb_grip_contours import RedBallGripContours
 from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
 from ReflectiveTapeContours import ReflectiveTapeContours
+
 
 VIDEO_WIDTH = 320
 VIDEO_HEIGHT = 240
@@ -367,6 +370,7 @@ if __name__ == "__main__":
 
     RedGrip = RedBallGripContours()
     GreenGrip = ReflectiveTapeContours()
+    BlueGrip = BlueBallGripPipeline()
 
     sinkA = CvSink("main cam")  
 
@@ -386,13 +390,25 @@ if __name__ == "__main__":
 
     
     while True:
-        divisor = sd.getNumber("Speed Constant", (5000/VIDEO_HEIGHT))
+        line_divisor = sd.getNumber("Speed Constant", (5000/VIDEO_HEIGHT))
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
-        RedGrip.process(image_A) #passing image_A and searching for the red ball
+        
         GreenGrip.process(image_A)
-        red_contours = RedGrip.filter_contours_output
         green_contours = GreenGrip.filter_contours_output
-        motor_velocity = sd.getNumber("Motor Velocity", 0)
+        
+        if (isRedAlliance):
+            RedGrip.process(image_A) #passing image_A and searching for the red ball
+            red_contours = RedGrip.filter_contours_output
+            main_contours = red_contours
+        else:
+            BlueGrip.process(image_A)
+            blue_contours = BlueGrip.filter_contours_output
+            main_contours = blue_contours
+
+        
+        
+        
+        motor_velocity = sd.getNumber("Motor Velocity", 0) #getting the motor velocity
         
         for contour in red_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
@@ -402,8 +418,8 @@ if __name__ == "__main__":
 
         ball_dist = -1
         green_dist = -1
-        if red_contours != []:
-            ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, red_contours)
+        if main_contours != []:
+            ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, main_contours)
             x_center_ball = x_center_ball/VIDEO_WIDTH
             y_center_ball = y_center_ball/VIDEO_HEIGHT
             sd.putNumber('Ball X', x_center_ball)
@@ -418,7 +434,7 @@ if __name__ == "__main__":
             sd.putNumber('Green X', x_center_green)
             sd.putNumber('Green Y', y_center_green)
 
-        y_val = motor_velocity/divisor
+        y_val = motor_velocity/line_divisor
         y_val = int(VIDEO_HEIGHT - y_val)
 
         cv2.line(image_A, (0, y_val), (VIDEO_WIDTH, y_val), (192, 192, 192), 2)
