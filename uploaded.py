@@ -9,9 +9,8 @@ import time
 import sys
 import cv2
 import numpy
-from pip import main
 from bb_grip_contours import BlueBallGripPipeline
-from rb_grip_contours import RedBallGripContours
+from rb_grip_contours import RedBallGripPipeline
 from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
 from ReflectiveTapeContours import ReflectiveTapeContours
@@ -373,7 +372,7 @@ if __name__ == "__main__":
     print("Camera Default Configurations Complete")
 
 
-    RedGrip = RedBallGripContours()
+    RedGrip = RedBallGripPipeline()
     GreenGrip = ReflectiveTapeContours()
     BlueGrip = BlueBallGripPipeline()
 
@@ -388,14 +387,14 @@ if __name__ == "__main__":
     dashSource1 = camservInst.putVideo("UI Active Cam", VIDEO_WIDTH, VIDEO_HEIGHT) #creating a single main camera object
 
     sd = ntinst.getTable('SmartDashboard') #getting the smart dashboard object
-    isRedAlliance = sd.getBoolean("isRedAlliance", False)
+    
     
     
     print("initalize complete")
 
     
     while True:
-        
+        isRedAlliance = sd.getBoolean("isRedAlliance", False)
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         
         GreenGrip.process(image_A)
@@ -412,7 +411,7 @@ if __name__ == "__main__":
         
         motor_velocity = sd.getNumber("Motor Velocity", 0) #getting the motor velocity
         
-        for contour in red_contours:
+        for contour in main_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
 
         for contour in green_contours:
@@ -438,7 +437,7 @@ if __name__ == "__main__":
             sd.putNumber('Green Y', y_center_green)
             sd.putNumber('Green Distance', green_dist)
 
-        placeLine(image_A, image_A)
+        placeLine(motor_velocity, image_A)
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         
         
