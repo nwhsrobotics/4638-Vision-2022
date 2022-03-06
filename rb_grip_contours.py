@@ -12,16 +12,16 @@ class RedBallGripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [0.0, 36.38297872340426]
-        self.__hsv_threshold_saturation = [193.90259403113282, 254.68313908661398]
-        self.__hsv_threshold_value = [163.9505344876641, 255.0]
+        self.__hsv_threshold_hue = [0.0, 180.0]
+        self.__hsv_threshold_saturation = [201.69491525423726, 255.0]
+        self.__hsv_threshold_value = [0.0, 255.0]
 
         self.hsv_threshold_output = None
 
         self.__cv_erode_src = self.hsv_threshold_output
         self.__cv_erode_kernel = None
         self.__cv_erode_anchor = (-1, -1)
-        self.__cv_erode_iterations = 2.0
+        self.__cv_erode_iterations = 1.0
         self.__cv_erode_bordertype = cv2.BORDER_CONSTANT
         self.__cv_erode_bordervalue = (-1)
 
@@ -38,7 +38,7 @@ class RedBallGripPipeline:
         self.find_contours_output = None
 
         self.__filter_contours_contours = self.find_contours_output
-        self.__filter_contours_min_area = 207.0
+        self.__filter_contours_min_area = 164.0
         self.__filter_contours_min_perimeter = 0.0
         self.__filter_contours_min_width = 0.0
         self.__filter_contours_max_width = 1000.0

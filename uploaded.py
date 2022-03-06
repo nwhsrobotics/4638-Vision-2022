@@ -241,13 +241,13 @@ def runReflective(image, mainContours):
         x_min_green = numpy.amin(x_points_green)
         x_max_green = numpy.amax(x_points_green)
         green_width = x_max_green - x_min_green
-        FOCAL_LENGTH = 289.1 #old 217.42   
+        FOCAL_LENGTH = 374.8#289.1 #old 217.42   
 
 
         #call distance function to return widths
         Green_Real_Width = 5 #in
         perceived_distance = (FOCAL_LENGTH*Green_Real_Width)/green_width
-
+        #print(green_width)
 
         y_min_green = numpy.amin(y_points_green)
         y_max_green = numpy.amax(y_points_green)
@@ -284,6 +284,8 @@ def runReflective(image, mainContours):
 
 
 
+
+
 def runBall(image, mainContours):
     found_contours = []
     for contours in mainContours:
@@ -297,6 +299,7 @@ def runBall(image, mainContours):
         x_max_red = numpy.amax(x_points_red)
         red_width = x_max_red - x_min_red
         FOCAL_LENGTH = 289.1 #old 217.42   
+        
 
 
 
@@ -378,7 +381,8 @@ if __name__ == "__main__":
 
     sinkA = CvSink("main cam")  
 
-    sinkA.setSource(cameras[1])
+    sinkA.setSource(cameras[0]) #CAMERA ID
+
 
     image_A = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
 
@@ -394,11 +398,11 @@ if __name__ == "__main__":
 
     
     while True:
-        isRedAlliance = sd.getBoolean("isRedAlliance", False)
+        isRedAlliance = sd.getBoolean("isRedAlliance", True)
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         
-        GreenGrip.process(image_A)
-        green_contours = GreenGrip.filter_contours_output
+        #GreenGrip.process(image_A)
+        #green_contours = GreenGrip.filter_contours_output
         
         if (isRedAlliance):
             RedGrip.process(image_A) #passing image_A and searching for the red ball
@@ -414,19 +418,25 @@ if __name__ == "__main__":
         for contour in main_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
 
+        
+        '''
         for contour in green_contours:
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
+        '''
 
         ball_dist = -1
         green_dist = -1
+        x_center_ball = -1
+        y_center_ball = -1
         if main_contours != []:
             ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, main_contours)
             x_center_ball = x_center_ball/VIDEO_WIDTH
             y_center_ball = y_center_ball/VIDEO_HEIGHT
-            sd.putNumber('Ball X', x_center_ball)
-            sd.putNumber('Ball Y', y_center_ball)
-            sd.putNumber('Ball Distance', ball_dist)
+        sd.putNumber('Ball X', x_center_ball)
+        sd.putNumber('Ball Y', y_center_ball)
+        sd.putNumber('Ball Distance', ball_dist)
         
+        '''
         if green_contours != []:
             green_dist, x_center_green, y_center_green, image_A = runReflective(image_A, green_contours)
 
@@ -436,7 +446,7 @@ if __name__ == "__main__":
             sd.putNumber('Green X', x_center_green)
             sd.putNumber('Green Y', y_center_green)
             sd.putNumber('Green Distance', green_dist)
-
+        '''
         placeLine(motor_velocity, image_A)
         dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         

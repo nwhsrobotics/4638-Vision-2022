@@ -12,16 +12,16 @@ class BlueBallGripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [57.62711864406781, 106.59574468085107]
-        self.__hsv_threshold_saturation = [217.9138934661611, 255.0]
-        self.__hsv_threshold_value = [77.50985652156241, 255.0]
+        self.__hsv_threshold_hue = [69.49152542372882, 149.68085106382978]
+        self.__hsv_threshold_saturation = [160.28677482209332, 255.0]
+        self.__hsv_threshold_value = [46.9915696299563, 255.0]
 
         self.hsv_threshold_output = None
 
         self.__cv_erode_src = self.hsv_threshold_output
         self.__cv_erode_kernel = None
         self.__cv_erode_anchor = (-1, -1)
-        self.__cv_erode_iterations = 2.0
+        self.__cv_erode_iterations = 0.0
         self.__cv_erode_bordertype = cv2.BORDER_CONSTANT
         self.__cv_erode_bordervalue = (-1)
 
@@ -178,6 +178,8 @@ class BlueBallGripPipeline:
             ratio = (float)(w) / h
             if (ratio < min_ratio or ratio > max_ratio):
                 continue
+            approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
+            print(approx)
             output.append(contour)
         return output
 

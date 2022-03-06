@@ -1,7 +1,7 @@
 <grip:Pipeline>
   <sources>
     <grip:Camera>
-      <property name="address" value="http://wpilibpi.local:1182/stream.mjpg"/>
+      <property name="address" value="http://wpilibpi.local:1181/stream.mjpg"/>
     </grip:Camera>
   </sources>
   <steps>
@@ -9,19 +9,19 @@
       <grip:Input step="0" socket="0"/>
       <grip:Input step="0" socket="1">
         <value>
-          <double>57.62711864406781</double>
-          <double>106.59574468085107</double>
+          <double>69.49152542372882</double>
+          <double>149.68085106382978</double>
         </value>
       </grip:Input>
       <grip:Input step="0" socket="2">
         <value>
-          <double>217.9138934661611</double>
+          <double>160.28677482209332</double>
           <double>255.0</double>
         </value>
       </grip:Input>
       <grip:Input step="0" socket="3">
         <value>
-          <double>77.50985652156241</double>
+          <double>46.9915696299563</double>
           <double>255.0</double>
         </value>
       </grip:Input>
@@ -32,7 +32,7 @@
       <grip:Input step="1" socket="1"/>
       <grip:Input step="1" socket="2"/>
       <grip:Input step="1" socket="3">
-        <value>2.0</value>
+        <value>0.0</value>
       </grip:Input>
       <grip:Input step="1" socket="4">
         <value>BORDER_CONSTANT</value>
@@ -119,12 +119,16 @@
   </steps>
   <connections>
     <grip:Connection>
-      <grip:Output source="0" socket="0" previewed="true"/>
-      <grip:Input step="0" socket="0"/>
+      <grip:Output step="0" socket="0" previewed="true"/>
+      <grip:Input step="1" socket="0"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output step="1" socket="0" previewed="false"/>
       <grip:Input step="3" socket="0"/>
+    </grip:Connection>
+    <grip:Connection>
+      <grip:Output step="1" socket="0" previewed="false"/>
+      <grip:Input step="2" socket="1"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output source="0" socket="0" previewed="true"/>
@@ -135,16 +139,12 @@
       <grip:Input step="4" socket="0"/>
     </grip:Connection>
     <grip:Connection>
-      <grip:Output step="1" socket="0" previewed="false"/>
-      <grip:Input step="2" socket="1"/>
+      <grip:Output source="0" socket="0" previewed="true"/>
+      <grip:Input step="0" socket="0"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output step="4" socket="0" previewed="true"/>
       <grip:Input step="5" socket="0"/>
-    </grip:Connection>
-    <grip:Connection>
-      <grip:Output step="0" socket="0" previewed="true"/>
-      <grip:Input step="1" socket="0"/>
     </grip:Connection>
   </connections>
   <settings>
