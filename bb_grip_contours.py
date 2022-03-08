@@ -180,7 +180,8 @@ class BlueBallGripPipeline:
             if (ratio < min_ratio or ratio > max_ratio):
                 continue
             #approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
-            
+            #len(approx) -- this returns the circularity approximation
+            output.append(contour)
             
         return output
 

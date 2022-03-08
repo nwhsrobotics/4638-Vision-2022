@@ -380,12 +380,14 @@ if __name__ == "__main__":
     BlueGrip = BlueBallGripPipeline()
 
     sinkA = CvSink("main cam")  
+    sinkB = CvSink("reverse cam")
 
     sinkA.setSource(cameras[0]) #CAMERA ID
+    sinkB.setSource(cameras[1])
 
 
     image_A = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
-
+    image_B = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
     
     camservInst = CameraServer.getInstance()
     dashSource1 = camservInst.putVideo("UI Active Cam", VIDEO_WIDTH, VIDEO_HEIGHT) #creating a single main camera object
@@ -399,10 +401,12 @@ if __name__ == "__main__":
     
     while True:
         isRedAlliance = sd.getBoolean("isRedAlliance", True)
+        isReversed = sd.getBoolean("isReversed", False)
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
-        
+        timestamp, image_B = sinkB.grabFrame(image_B)
         #GreenGrip.process(image_A)
         #green_contours = GreenGrip.filter_contours_output
+        
         
         if (isRedAlliance):
             RedGrip.process(image_A) #passing image_A and searching for the red ball
@@ -448,7 +452,11 @@ if __name__ == "__main__":
             sd.putNumber('Green Distance', green_dist)
         '''
         placeLine(motor_velocity, image_A)
-        dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
+        
+        if (isReversed):
+            dashSource1.putFrame(image_B)
+        else:
+            dashSource1.putFrame(image_A) #putting the postProcessed frame onto smartdashboard
         
         
         #TODO: Make sure to publish the contours report onto SmartDashboard
