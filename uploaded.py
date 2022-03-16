@@ -382,8 +382,8 @@ if __name__ == "__main__":
     sinkA = CvSink("main cam")  
     sinkB = CvSink("reverse cam")
 
-    sinkA.setSource(cameras[0]) #CAMERA ID
-    sinkB.setSource(cameras[1])
+    sinkA.setSource(cameras[1]) #CAMERA ID
+    sinkB.setSource(cameras[0])
 
 
     image_A = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
@@ -462,6 +462,7 @@ if __name__ == "__main__":
         #TODO: Make sure to publish the contours report onto SmartDashboard
        
 
+
         
 
         
@@ -469,5 +470,9 @@ if __name__ == "__main__":
 @sd Usage
 * sd.getNumber("KEY_NAME", defaultValue)
 * sd.putNumber('KEY_NAME', value)
+
+code for approximating the circularity
+#approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
+            #len(approx) -- this returns the circularity approximation
 
 '''
