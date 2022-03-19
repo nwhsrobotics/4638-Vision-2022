@@ -12,9 +12,9 @@ class RedBallGripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [0.0, 180.0]
-        self.__hsv_threshold_saturation = [201.69491525423726, 255.0]
-        self.__hsv_threshold_value = [0.0, 255.0]
+        self.__hsv_threshold_hue = [0.39151710403596507, 94.07734698189199]
+        self.__hsv_threshold_saturation = [192.0418996654857, 255.0]
+        self.__hsv_threshold_value = [139.26553672316382, 255.0]
 
         self.hsv_threshold_output = None
 
@@ -133,7 +133,7 @@ class RedBallGripPipeline:
         else:
             mode = cv2.RETR_LIST
         method = cv2.CHAIN_APPROX_SIMPLE
-        im2, contours, hierarchy =cv2.findContours(input, mode=mode, method=method)
+        contours, hierarchy =cv2.findContours(input, mode=mode, method=method)
         return contours
 
     @staticmethod

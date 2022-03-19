@@ -278,7 +278,7 @@ def runReflective(image, mainContours):
     avg_dist = avg_dist/num_found_countours
     avg_x_center_green = avg_x_center_green/num_found_countours
     avg_y_center_green = avg_y_center_green/num_found_countours
-    cv2.circle(image, (int(avg_x_center_green), int(avg_y_center_green)), radius=7, color=(0, 0, 255), thickness=7)    
+    cv2.circle(image, (int(avg_x_center_green), int(avg_y_center_green)), radius=7, color=(0, 255, 0), thickness=7)    
     
     return (avg_dist, avg_x_center_green, avg_y_center_green, image)
 
@@ -286,7 +286,7 @@ def runReflective(image, mainContours):
 
 
 
-def runBall(image, mainContours):
+def runBall(image, mainContours, isRedAlliance):
     found_contours = []
     for contours in mainContours:
 
@@ -335,6 +335,10 @@ def runBall(image, mainContours):
         if data_tup[0] < shortestDistance:
             shortestDistance = data_tup[0]
             closestBallData = data_tup 
+    if (isRedAlliance):
+        cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(0, 0, 255), thickness=7)    
+    else: 
+        cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(255, 0, 0), thickness=7)    
 
     return closestBallData
 
@@ -382,8 +386,8 @@ if __name__ == "__main__":
     sinkA = CvSink("main cam")  
     sinkB = CvSink("reverse cam")
 
-    sinkA.setSource(cameras[1]) #CAMERA ID
-    sinkB.setSource(cameras[0])
+    sinkA.setSource(cameras[0]) #CAMERA ID
+    sinkB.setSource(cameras[1])
 
 
     image_A = numpy.ndarray((VIDEO_WIDTH,VIDEO_HEIGHT,3), dtype = numpy.uint8)
@@ -404,8 +408,8 @@ if __name__ == "__main__":
         isReversed = sd.getBoolean("isReversed", False)
         timestamp,image_A = sinkA.grabFrame(image_A) #collecting the frame 
         timestamp, image_B = sinkB.grabFrame(image_B)
-        #GreenGrip.process(image_A)
-        #green_contours = GreenGrip.filter_contours_output
+        GreenGrip.process(image_B)
+        green_contours = GreenGrip.filter_contours_output
         
         
         if (isRedAlliance):
@@ -423,26 +427,26 @@ if __name__ == "__main__":
             cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
 
         
-        '''
+        
         for contour in green_contours:
-            cv2.drawContours(image_A, contour, -1, (0, 255, 0), 3)
-        '''
+            cv2.drawContours(image_B, contour, -1, (0, 255, 0), 3)
+
 
         ball_dist = -1
         green_dist = -1
         x_center_ball = -1
         y_center_ball = -1
         if main_contours != []:
-            ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, main_contours)
+            ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, main_contours, isRedAlliance)
             x_center_ball = x_center_ball/VIDEO_WIDTH
             y_center_ball = y_center_ball/VIDEO_HEIGHT
         sd.putNumber('Ball X', x_center_ball)
         sd.putNumber('Ball Y', y_center_ball)
         sd.putNumber('Ball Distance', ball_dist)
         
-        '''
+        
         if green_contours != []:
-            green_dist, x_center_green, y_center_green, image_A = runReflective(image_A, green_contours)
+            green_dist, x_center_green, y_center_green, image_B = runReflective(image_B, green_contours)
 
             #x center and y center is in terms of pixels, converting pixels to a value between 0 and 1
             x_center_green = x_center_green/VIDEO_WIDTH
@@ -450,8 +454,8 @@ if __name__ == "__main__":
             sd.putNumber('Green X', x_center_green)
             sd.putNumber('Green Y', y_center_green)
             sd.putNumber('Green Distance', green_dist)
-        '''
-        placeLine(motor_velocity, image_A)
+        
+        #placeLine(motor_velocity, image_A)
         
         if (isReversed):
             dashSource1.putFrame(image_B)
