@@ -331,7 +331,15 @@ def runBall(image, mainContours, isRedAlliance):
     
     closestBallData = tuple()
     shortestDistance = 10000000000000000
+    '''
+    This is a new filter'''
+    filtered_contours = []
     for data_tup in found_contours:
+        if (data_tup[2] > 90) and (data_tup[2] < 235):
+            filtered_contours.append(data_tup)
+    #end of new filter
+    #for data_tup in found_contours:
+    for data_tup in filtered_contours:
         if data_tup[0] < shortestDistance:
             shortestDistance = data_tup[0]
             closestBallData = data_tup 
