@@ -12,9 +12,9 @@ class ReflectiveTapeContours:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [49.15256706265447, 126.90747630451322]
-        self.__hsv_threshold_saturation = [84.72104764185141, 254.9257482881141]
-        self.__hsv_threshold_value = [146.4689265536723, 255.0]
+        self.__hsv_threshold_hue = [47.45765180841718, 95.4255319148936]
+        self.__hsv_threshold_saturation = [41.47292433113239, 182.6595744680851]
+        self.__hsv_threshold_value = [133.24493345366363, 255.0]
 
         self.hsv_threshold_output = None
 
@@ -38,13 +38,13 @@ class ReflectiveTapeContours:
         self.find_contours_output = None
 
         self.__filter_contours_contours = self.find_contours_output
-        self.__filter_contours_min_area = 20.0
+        self.__filter_contours_min_area = 15.0
         self.__filter_contours_min_perimeter = 0.0
         self.__filter_contours_min_width = 0.0
         self.__filter_contours_max_width = 1000.0
         self.__filter_contours_min_height = 0.0
         self.__filter_contours_max_height = 1000.0
-        self.__filter_contours_solidity = [0, 100]
+        self.__filter_contours_solidity = [0.0, 100.0]
         self.__filter_contours_max_vertices = 1000000.0
         self.__filter_contours_min_vertices = 0.0
         self.__filter_contours_min_ratio = 0.0

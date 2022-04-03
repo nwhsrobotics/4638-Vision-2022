@@ -339,23 +339,30 @@ def runBall(image, mainContours, isRedAlliance):
             filtered_contours.append(data_tup)
     #end of new filter
     #for data_tup in found_contours:
+    count = 0
     for data_tup in filtered_contours:
         if data_tup[0] < shortestDistance:
             shortestDistance = data_tup[0]
-            closestBallData = data_tup 
-    if (isRedAlliance):
-        cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(0, 0, 255), thickness=7)    
-    else: 
-        cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(255, 0, 0), thickness=7)    
+            closestBallData = data_tup
+        count += 1
+    #TODO: Add a safety feature here in case there is no data in the tuple, we wont draw the circle
+    
+    if (count > 0):
+        if (isRedAlliance):
+            cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(0, 0, 255), thickness=7)    
+        else: 
+            cv2.circle(image, (int(closestBallData[1]), int(closestBallData[2])), radius=7, color=(255, 0, 0), thickness=7)    
 
-    return closestBallData
+        return closestBallData
+    
+    return -1, -1, -1, -1
 
-def placeLine(velocity, image):
-    line_divisor = sd.getNumber("Speed Constant", (5000/VIDEO_HEIGHT))
-    y_val = velocity/line_divisor
-    y_val = int(VIDEO_HEIGHT - y_val)
+def placeLine(pos, image):
+    #line_divisor = sd.getNumber("Speed Constant", (5000/VIDEO_HEIGHT))
+    #y_val = velocity/line_divisor
+    y_val = int(VIDEO_HEIGHT - pos)
 
-    cv2.line(image, (0, y_val), (VIDEO_WIDTH, y_val), (192, 192, 192), 2)
+    cv2.line(image, (0, y_val), (VIDEO_WIDTH, y_val), (23, 177, 251), 2)
 
 
 if __name__ == "__main__":
@@ -446,8 +453,11 @@ if __name__ == "__main__":
         y_center_ball = -1
         if main_contours != []:
             ball_dist, x_center_ball, y_center_ball, image_A = runBall(image_A, main_contours, isRedAlliance)
-            x_center_ball = x_center_ball/VIDEO_WIDTH
-            y_center_ball = y_center_ball/VIDEO_HEIGHT
+
+            if (not x_center_ball == -1):
+                x_center_ball = x_center_ball/VIDEO_WIDTH
+                y_center_ball = y_center_ball/VIDEO_HEIGHT
+                
         sd.putNumber('Ball X', x_center_ball)
         sd.putNumber('Ball Y', y_center_ball)
         sd.putNumber('Ball Distance', ball_dist)
@@ -463,7 +473,7 @@ if __name__ == "__main__":
             sd.putNumber('Green Y', y_center_green)
             sd.putNumber('Green Distance', green_dist)
         
-        #placeLine(motor_velocity, image_A)
+        placeLine(VIDEO_HEIGHT-72, image_B)
         
         if (isReversed):
             dashSource1.putFrame(image_B)
