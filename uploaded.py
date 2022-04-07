@@ -462,7 +462,9 @@ if __name__ == "__main__":
         sd.putNumber('Ball Y', y_center_ball)
         sd.putNumber('Ball Distance', ball_dist)
         
-        
+        if (x_center_ball == -1):
+            timestamp, image_A = sinkA.grabFrame(image_A) #get the frame again if there is nothing
+
         if green_contours != []:
             green_dist, x_center_green, y_center_green, image_B = runReflective(image_B, green_contours)
 
@@ -473,7 +475,7 @@ if __name__ == "__main__":
             sd.putNumber('Green Y', y_center_green)
             sd.putNumber('Green Distance', green_dist)
         
-        placeLine(VIDEO_HEIGHT-72, image_B)
+        placeLine(VIDEO_HEIGHT-48, image_B)
         
         if (isReversed):
             dashSource1.putFrame(image_B)

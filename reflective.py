@@ -12,9 +12,9 @@ class ReflectiveTapeContours:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [47.45765180841718, 95.4255319148936]
-        self.__hsv_threshold_saturation = [41.47292433113239, 182.6595744680851]
-        self.__hsv_threshold_value = [133.24493345366363, 255.0]
+        self.__hsv_threshold_hue = [54.43918375092774, 113.27978959297612]
+        self.__hsv_threshold_saturation = [7.203711289690616, 137.86860490671197]
+        self.__hsv_threshold_value = [186.6801430655567, 255.0]
 
         self.hsv_threshold_output = None
 
