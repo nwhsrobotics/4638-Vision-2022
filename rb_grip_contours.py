@@ -12,7 +12,7 @@ class RedBallGripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [0.0, 180.0]
+        self.__hsv_threshold_hue = [0.0, 78.76977152899823]
         self.__hsv_threshold_saturation = [146.4689265536723, 241.43617021276594]
         self.__hsv_threshold_value = [156.07344632768363, 255.0]
 

@@ -9,19 +9,19 @@
       <grip:Input step="0" socket="0"/>
       <grip:Input step="0" socket="1">
         <value>
-          <double>54.43918375092774</double>
-          <double>113.27978959297612</double>
+          <double>26.029972984165898</double>
+          <double>98.54309379449063</double>
         </value>
       </grip:Input>
       <grip:Input step="0" socket="2">
         <value>
-          <double>7.203711289690616</double>
-          <double>137.86860490671197</double>
+          <double>26.41275083771321</double>
+          <double>162.51711105785435</double>
         </value>
       </grip:Input>
       <grip:Input step="0" socket="3">
         <value>
-          <double>186.6801430655567</double>
+          <double>222.6970922180991</double>
           <double>255.0</double>
         </value>
       </grip:Input>
@@ -55,7 +55,7 @@
     <grip:Step name="Filter Contours">
       <grip:Input step="4" socket="0"/>
       <grip:Input step="4" socket="1">
-        <value>15.0</value>
+        <value>18.0</value>
       </grip:Input>
       <grip:Input step="4" socket="2">
         <value>0.0</value>
@@ -119,20 +119,12 @@
   </steps>
   <connections>
     <grip:Connection>
-      <grip:Output source="0" socket="0" previewed="true"/>
-      <grip:Input step="0" socket="0"/>
-    </grip:Connection>
-    <grip:Connection>
-      <grip:Output step="1" socket="0" previewed="true"/>
-      <grip:Input step="2" socket="1"/>
-    </grip:Connection>
-    <grip:Connection>
       <grip:Output step="0" socket="0" previewed="true"/>
       <grip:Input step="1" socket="0"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output source="0" socket="0" previewed="true"/>
-      <grip:Input step="2" socket="0"/>
+      <grip:Input step="0" socket="0"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output step="4" socket="0" previewed="true"/>
@@ -141,6 +133,14 @@
     <grip:Connection>
       <grip:Output step="3" socket="0" previewed="true"/>
       <grip:Input step="4" socket="0"/>
+    </grip:Connection>
+    <grip:Connection>
+      <grip:Output step="1" socket="0" previewed="true"/>
+      <grip:Input step="2" socket="1"/>
+    </grip:Connection>
+    <grip:Connection>
+      <grip:Output source="0" socket="0" previewed="true"/>
+      <grip:Input step="2" socket="0"/>
     </grip:Connection>
     <grip:Connection>
       <grip:Output step="1" socket="0" previewed="true"/>
@@ -160,7 +160,7 @@
     <language>Python</language>
     <className>ReflectiveTapeContours</className>
     <implementWpilibPipeline>false</implementWpilibPipeline>
-    <saveDir>/Users/kavip/Documents/GitHub/4638-Vision-2022</saveDir>
+    <saveDir>C:\Users\jagbo\GRIP</saveDir>
     <packageName></packageName>
     <moduleName>reflective</moduleName>
   </codeGenerationSettings>
